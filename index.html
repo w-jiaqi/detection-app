@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fake News Detector</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>" />
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo">
+        <span class="logo-icon">🔍</span>
+        <h1>Fake News Detector</h1>
+      </div>
+      <p class="tagline">Paste any news article or headline and get an instant credibility analysis</p>
+    </header>
+
+    <main>
+      <section class="input-section">
+        <label for="news-input">Paste the news article or headline below:</label>
+        <textarea
+          id="news-input"
+          placeholder="e.g. &quot;BREAKING: Scientists discover that drinking coffee makes you immortal! Share before they delete this!!!&quot;"
+          rows="8"
+        ></textarea>
+        <div class="input-actions">
+          <span id="char-count" class="char-count">0 characters</span>
+          <div class="buttons">
+            <button id="clear-btn" class="btn btn-secondary" disabled>Clear</button>
+            <button id="analyze-btn" class="btn btn-primary" disabled>Analyze</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="results" class="results-section hidden">
+        <div class="score-card">
+          <div class="score-ring-wrapper">
+            <svg class="score-ring" viewBox="0 0 140 140">
+              <circle class="score-ring-bg" cx="70" cy="70" r="60" />
+              <circle id="score-ring-fill" class="score-ring-fill" cx="70" cy="70" r="60" />
+            </svg>
+            <div class="score-value">
+              <span id="score-number">0</span>
+              <span class="score-label">/ 100</span>
+            </div>
+          </div>
+          <div class="score-info">
+            <h2 id="verdict-text">Analyzing...</h2>
+            <p id="verdict-description"></p>
+          </div>
+        </div>
+
+        <div class="breakdown">
+          <h3>Detailed Breakdown</h3>
+          <div id="breakdown-items" class="breakdown-items"></div>
+        </div>
+
+        <div class="tips" id="tips-section">
+          <h3>Recommendations</h3>
+          <ul id="tips-list"></ul>
+        </div>
+      </section>
+
+      <section class="how-it-works">
+        <h3>How It Works</h3>
+        <div class="features">
+          <div class="feature">
+            <div class="feature-icon">📝</div>
+            <h4>Text Analysis</h4>
+            <p>Detects sensationalist language, excessive punctuation, and clickbait patterns</p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">🎭</div>
+            <h4>Emotion Detection</h4>
+            <p>Identifies emotionally manipulative language designed to bypass critical thinking</p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">📊</div>
+            <h4>Source Quality</h4>
+            <p>Checks for vague attributions and unverifiable claims common in misinformation</p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">⚖️</div>
+            <h4>Credibility Score</h4>
+            <p>Combines multiple signals into a clear 0–100 credibility score with explanations</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>This tool uses text-analysis heuristics to flag common patterns found in misinformation. It is not a substitute for professional fact-checking. Always verify news with trusted sources.</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
