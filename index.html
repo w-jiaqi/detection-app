@@ -66,6 +66,22 @@
       </div>
     </section>
 
+    <!-- Loading State -->
+    <section id="loading" class="loading-section hidden">
+      <div class="loading-card">
+        <div class="loading-spinner-large"></div>
+        <h3>Analyzing text...</h3>
+        <p>Checking for clickbait, emotional manipulation, missing sources, and other misinformation patterns</p>
+        <div class="loading-steps">
+          <div class="loading-step" data-step="1">Scanning for clickbait language...</div>
+          <div class="loading-step" data-step="2">Detecting emotional manipulation...</div>
+          <div class="loading-step" data-step="3">Checking source attribution...</div>
+          <div class="loading-step" data-step="4">Verifying statistics &amp; claims...</div>
+          <div class="loading-step" data-step="5">Computing credibility score...</div>
+        </div>
+      </div>
+    </section>
+
     <!-- Results Section -->
     <a id="results-anchor" class="anchor"></a>
     <section id="results" class="results-section hidden">
@@ -141,10 +157,13 @@
 
       <!-- Washington Post -->
       <a href="https://www.washingtonpost.com/national-security/2026/03/06/iran-war-us-israel-strikes/" target="_blank" rel="noopener" class="rich-card">
-        <div class="rich-card-preview" style="background: linear-gradient(135deg, #1a1a2e 0%, #2d2b55 100%)">
-          <div class="rich-card-masthead">The Washington Post</div>
-          <div class="rich-card-headline">Trump demands 'unconditional surrender' from Iran — live updates</div>
+        <div class="rich-card-img">
+          <img src="https://image.thum.io/get/width/600/crop/400/https://www.washingtonpost.com/" alt="Washington Post" loading="lazy" />
           <span class="rich-card-badge live-badge">LIVE</span>
+        </div>
+        <div class="rich-card-body">
+          <span class="rich-card-source-name">Washington Post</span>
+          <p>Iran war live updates — U.S.–Israel strikes and Iran's response</p>
         </div>
         <div class="rich-card-footer">
           <span class="rich-card-source">washingtonpost.com</span>
@@ -154,10 +173,13 @@
 
       <!-- The Guardian -->
       <a href="https://www.theguardian.com/world/live/2026/mar/05/iran-war-latest-updates-canada-carney-trump-israel-tehran-strikes" target="_blank" rel="noopener" class="rich-card">
-        <div class="rich-card-preview" style="background: linear-gradient(135deg, #09508a 0%, #0a6abf 100%)">
-          <div class="rich-card-masthead">The Guardian</div>
-          <div class="rich-card-headline">Explosions heard across Tel Aviv — live blog with frequent updates</div>
+        <div class="rich-card-img">
+          <img src="https://image.thum.io/get/width/600/crop/400/https://www.theguardian.com/world" alt="The Guardian" loading="lazy" />
           <span class="rich-card-badge live-badge">LIVE BLOG</span>
+        </div>
+        <div class="rich-card-body">
+          <span class="rich-card-source-name">The Guardian</span>
+          <p>Real-time live blog — strikes, diplomacy &amp; military developments</p>
         </div>
         <div class="rich-card-footer">
           <span class="rich-card-source">theguardian.com</span>
@@ -167,10 +189,13 @@
 
       <!-- AP News -->
       <a href="https://apnews.com/hub/iran" target="_blank" rel="noopener" class="rich-card">
-        <div class="rich-card-preview" style="background: linear-gradient(135deg, #e3120b 0%, #a30d08 100%)">
-          <div class="rich-card-masthead">Associated Press</div>
-          <div class="rich-card-headline">Iran conflict hub — casualties, military actions &amp; global reactions</div>
+        <div class="rich-card-img">
+          <img src="https://image.thum.io/get/width/600/crop/400/https://apnews.com/hub/iran" alt="AP News" loading="lazy" />
           <span class="rich-card-badge">NEWS HUB</span>
+        </div>
+        <div class="rich-card-body">
+          <span class="rich-card-source-name">Associated Press</span>
+          <p>Iran conflict hub — casualties, military actions &amp; global reactions</p>
         </div>
         <div class="rich-card-footer">
           <span class="rich-card-source">apnews.com</span>
@@ -180,10 +205,13 @@
 
       <!-- Al Jazeera -->
       <a href="https://www.aljazeera.com/video/live" target="_blank" rel="noopener" class="rich-card">
-        <div class="rich-card-preview" style="background: linear-gradient(135deg, #c4941e 0%, #8a6a10 100%)">
-          <div class="rich-card-masthead">Al Jazeera English</div>
-          <div class="rich-card-headline">Live video stream — continuous coverage from the Middle East</div>
+        <div class="rich-card-img">
+          <img src="https://image.thum.io/get/width/600/crop/400/https://www.aljazeera.com/" alt="Al Jazeera" loading="lazy" />
           <span class="rich-card-badge live-badge">LIVE VIDEO</span>
+        </div>
+        <div class="rich-card-body">
+          <span class="rich-card-source-name">Al Jazeera</span>
+          <p>Continuous live video coverage &amp; reporting from the Middle East</p>
         </div>
         <div class="rich-card-footer">
           <span class="rich-card-source">aljazeera.com</span>
@@ -193,10 +221,13 @@
 
       <!-- CNN -->
       <a href="https://www.cnn.com/middleeast/live-news" target="_blank" rel="noopener" class="rich-card">
-        <div class="rich-card-preview" style="background: linear-gradient(135deg, #cc0000 0%, #8b0000 100%)">
-          <div class="rich-card-masthead">CNN</div>
-          <div class="rich-card-headline">Middle East live news — real-time field reporting from the region</div>
+        <div class="rich-card-img">
+          <img src="https://image.thum.io/get/width/600/crop/400/https://www.cnn.com/middleeast" alt="CNN" loading="lazy" />
           <span class="rich-card-badge live-badge">LIVE</span>
+        </div>
+        <div class="rich-card-body">
+          <span class="rich-card-source-name">CNN</span>
+          <p>Middle East live news — real-time field reporting from the region</p>
         </div>
         <div class="rich-card-footer">
           <span class="rich-card-source">cnn.com</span>
@@ -206,10 +237,13 @@
 
       <!-- Reuters -->
       <a href="https://www.reuters.com/world/middle-east/" target="_blank" rel="noopener" class="rich-card">
-        <div class="rich-card-preview" style="background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%)">
-          <div class="rich-card-masthead">Reuters</div>
-          <div class="rich-card-headline">Middle East — breaking developments, analysis &amp; in-depth reporting</div>
+        <div class="rich-card-img">
+          <img src="https://image.thum.io/get/width/600/crop/400/https://www.reuters.com/world/middle-east/" alt="Reuters" loading="lazy" />
           <span class="rich-card-badge">ANALYSIS</span>
+        </div>
+        <div class="rich-card-body">
+          <span class="rich-card-source-name">Reuters</span>
+          <p>Breaking developments, analysis &amp; in-depth reporting</p>
         </div>
         <div class="rich-card-footer">
           <span class="rich-card-source">reuters.com</span>
@@ -219,10 +253,13 @@
 
       <!-- New York Times -->
       <a href="https://www.nytimes.com/live" target="_blank" rel="noopener" class="rich-card">
-        <div class="rich-card-preview" style="background: linear-gradient(135deg, #1a1a1a 0%, #333 100%)">
-          <div class="rich-card-masthead" style="font-family: 'Georgia', serif; font-style: italic;">The New York Times</div>
-          <div class="rich-card-headline">Live coverage hub — Israel-Iran conflict updates &amp; analysis</div>
+        <div class="rich-card-img">
+          <img src="https://image.thum.io/get/width/600/crop/400/https://www.nytimes.com/" alt="New York Times" loading="lazy" />
           <span class="rich-card-badge live-badge">LIVE</span>
+        </div>
+        <div class="rich-card-body">
+          <span class="rich-card-source-name">New York Times</span>
+          <p>Live coverage hub — Israel-Iran conflict updates &amp; analysis</p>
         </div>
         <div class="rich-card-footer">
           <span class="rich-card-source">nytimes.com</span>
@@ -232,36 +269,8 @@
 
     </div>
 
-    <div class="panel-section">
-      <h4>Live Conflict Maps</h4>
-      <div class="source-cards-rich">
-        <a href="https://liveuamap.com/en/iran" target="_blank" rel="noopener" class="rich-card">
-          <div class="rich-card-preview map-preview" style="background: linear-gradient(135deg, #1a3a2a 0%, #2d5f2d 100%)">
-            <div class="rich-card-masthead">LiveUAMap — Iran</div>
-            <div class="rich-card-headline">Real-time OSINT &amp; satellite-verified battlefield reports</div>
-            <span class="rich-card-badge">MAP</span>
-          </div>
-          <div class="rich-card-footer">
-            <span class="rich-card-source">liveuamap.com</span>
-            <span class="rich-card-more">More &rarr;</span>
-          </div>
-        </a>
-        <a href="https://israelpalestine.liveuamap.com" target="_blank" rel="noopener" class="rich-card">
-          <div class="rich-card-preview map-preview" style="background: linear-gradient(135deg, #1a3a2a 0%, #2d5f2d 100%)">
-            <div class="rich-card-masthead">LiveUAMap — Israel / Palestine</div>
-            <div class="rich-card-headline">Aggregated satellite &amp; OSINT conflict updates</div>
-            <span class="rich-card-badge">MAP</span>
-          </div>
-          <div class="rich-card-footer">
-            <span class="rich-card-source">liveuamap.com</span>
-            <span class="rich-card-more">More &rarr;</span>
-          </div>
-        </a>
-      </div>
-    </div>
-
     <div class="panel-tip">
-      <strong>Tip:</strong> Monitor at least one live blog + one live map simultaneously for the fastest situational awareness during the conflict.
+      <strong>Tip:</strong> Cross-reference any breaking news you see on social media with at least two of the sources above before sharing.
     </div>
   </aside>
 

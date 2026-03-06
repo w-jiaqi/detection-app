@@ -49,15 +49,49 @@
     resultsSection.classList.add("hidden");
   });
 
+  const loadingSection = document.getElementById("loading");
+
   analyzeBtn.addEventListener("click", () => {
     const text = textarea.value.trim();
     if (text.length < 10) return;
-    const result = analyze(text);
-    renderResults(result);
 
-    document.querySelectorAll(".nav-item").forEach((n) => n.classList.remove("active"));
-    const resultsNav = document.querySelector('[data-section="results"]');
-    if (resultsNav) resultsNav.classList.add("active");
+    analyzeBtn.disabled = true;
+    analyzeBtn.innerHTML = `<span class="spinner"></span> Analyzing...`;
+    resultsSection.classList.add("hidden");
+    loadingSection.classList.remove("hidden");
+    loadingSection.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    const result = analyze(text);
+
+    const steps = loadingSection.querySelectorAll(".loading-step");
+    steps.forEach((s) => { s.classList.remove("active", "done"); });
+
+    const totalSteps = steps.length;
+    const stepInterval = 700;
+    const totalDelay = stepInterval * (totalSteps + 1) + 600;
+
+    steps.forEach((step, i) => {
+      setTimeout(() => { step.classList.add("active"); }, stepInterval * i);
+      setTimeout(() => {
+        step.classList.remove("active");
+        step.classList.add("done");
+      }, stepInterval * (i + 1));
+    });
+
+    setTimeout(() => {
+      loadingSection.classList.add("hidden");
+      renderResults(result);
+
+      analyzeBtn.disabled = false;
+      analyzeBtn.innerHTML = `
+        Analyze
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      `;
+
+      document.querySelectorAll(".nav-item").forEach((n) => n.classList.remove("active"));
+      const resultsNav = document.querySelector('[data-section="results"]');
+      if (resultsNav) resultsNav.classList.add("active");
+    }, totalDelay);
   });
 
   // ══════════════════════════════════════════════════════════
