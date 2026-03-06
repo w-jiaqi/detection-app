@@ -35,12 +35,19 @@
 
   // ── UI wiring ──────────────────────────────────────────────
 
-  textarea.addEventListener("input", () => {
+  function updateCharCount() {
     const len = textarea.value.trim().length;
     charCount.textContent = `${len} character${len !== 1 ? "s" : ""}`;
     analyzeBtn.disabled = len < 10;
     clearBtn.disabled = len === 0;
+  }
+
+  textarea.addEventListener("input", updateCharCount);
+  textarea.addEventListener("keyup", updateCharCount);
+  textarea.addEventListener("paste", function () {
+    setTimeout(updateCharCount, 0);
   });
+  textarea.addEventListener("change", updateCharCount);
 
   clearBtn.addEventListener("click", () => {
     textarea.value = "";
