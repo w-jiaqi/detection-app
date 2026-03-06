@@ -6,6 +6,33 @@
   const clearBtn = document.getElementById("clear-btn");
   const charCount = document.getElementById("char-count");
   const resultsSection = document.getElementById("results");
+  const menuBtn = document.getElementById("mobile-menu-btn");
+  const sidebar = document.querySelector(".sidebar");
+  const overlay = document.getElementById("sidebar-overlay");
+
+  // ── Mobile menu ────────────────────────────────────────────
+
+  if (menuBtn) {
+    menuBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+      overlay.classList.toggle("open");
+    });
+    overlay.addEventListener("click", () => {
+      sidebar.classList.remove("open");
+      overlay.classList.remove("open");
+    });
+  }
+
+  // ── Nav highlight ──────────────────────────────────────────
+
+  document.querySelectorAll(".nav-item").forEach((item) => {
+    item.addEventListener("click", () => {
+      document.querySelectorAll(".nav-item").forEach((n) => n.classList.remove("active"));
+      item.classList.add("active");
+      sidebar.classList.remove("open");
+      overlay.classList.remove("open");
+    });
+  });
 
   // ── UI wiring ──────────────────────────────────────────────
 
@@ -27,6 +54,11 @@
     if (text.length < 10) return;
     const result = analyze(text);
     renderResults(result);
+
+    // Activate "Results" nav
+    document.querySelectorAll(".nav-item").forEach((n) => n.classList.remove("active"));
+    const resultsNav = document.querySelector('[data-section="results"]');
+    if (resultsNav) resultsNav.classList.add("active");
   });
 
   // ── Analysis engine ────────────────────────────────────────
@@ -78,59 +110,47 @@
   }
 
   function analyze(text) {
-    const lower = text.toLowerCase();
     const words = text.split(/\s+/).filter(Boolean);
     const wordCount = words.length;
     const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
 
     const checks = {};
 
-    // 1. Clickbait / sensationalism
-    const clickbaitHits = countMatches(text, CLICKBAIT_WORDS);
     checks.clickbait = {
       label: "Clickbait Language",
-      raw: clickbaitHits,
+      raw: countMatches(text, CLICKBAIT_WORDS),
       max: 6,
       weight: 20,
     };
 
-    // 2. Emotional manipulation
-    const emotionHits = countMatches(text, EMOTIONAL_WORDS);
     checks.emotion = {
       label: "Emotional Manipulation",
-      raw: emotionHits,
+      raw: countMatches(text, EMOTIONAL_WORDS),
       max: 6,
       weight: 18,
     };
 
-    // 3. Absolutist language
-    const absolutistHits = countMatches(text, ABSOLUTIST_WORDS);
     checks.absolutist = {
       label: "Absolutist Language",
-      raw: absolutistHits,
+      raw: countMatches(text, ABSOLUTIST_WORDS),
       max: 5,
       weight: 12,
     };
 
-    // 4. Vague sourcing
-    const vagueHits = countMatches(text, VAGUE_SOURCING);
     checks.vague = {
       label: "Vague Sourcing",
-      raw: vagueHits,
+      raw: countMatches(text, VAGUE_SOURCING),
       max: 4,
       weight: 15,
     };
 
-    // 5. Urgency / pressure
-    const urgencyHits = countMatches(text, URGENCY_PHRASES);
     checks.urgency = {
       label: "Urgency / Pressure",
-      raw: urgencyHits,
+      raw: countMatches(text, URGENCY_PHRASES),
       max: 4,
       weight: 12,
     };
 
-    // 6. Caps-lock abuse – fraction of ALL-CAPS words (≥ 2 chars)
     const capsWords = words.filter(
       (w) => w.length >= 2 && w === w.toUpperCase() && /[A-Z]/.test(w)
     );
@@ -143,7 +163,6 @@
       isRatio: true,
     };
 
-    // 7. Punctuation abuse – ratio of ! and ? per sentence
     const exclamations = (text.match(/!/g) || []).length;
     const questions = (text.match(/\?/g) || []).length;
     const punctRatio =
@@ -157,7 +176,6 @@
       weight: 8,
     };
 
-    // 8. Article length – very short texts are more suspicious
     const lengthScore = wordCount < 20 ? 1 : wordCount < 60 ? 0.5 : 0;
     checks.length = {
       label: "Suspiciously Short",
@@ -166,15 +184,12 @@
       weight: 7,
     };
 
-    // Compute overall credibility (start at 100, subtract penalties)
     let totalPenalty = 0;
     const breakdownItems = [];
 
     for (const key of Object.keys(checks)) {
       const c = checks[key];
-      const normalized = c.isRatio
-        ? c.raw
-        : Math.min(c.raw / c.max, 1);
+      const normalized = c.isRatio ? c.raw : Math.min(c.raw / c.max, 1);
       const penalty = normalized * c.weight;
       totalPenalty += penalty;
 
@@ -191,11 +206,11 @@
     if (credibility >= 80) {
       verdict = "Likely Credible";
       description =
-        "This text shows few signs of misinformation. It uses measured language without obvious manipulation tactics. Still, always cross-check with reputable sources.";
+        "This text shows few signs of misinformation. It uses measured language without obvious manipulation tactics. Still, always cross-check with the reliable sources on the right.";
     } else if (credibility >= 60) {
       verdict = "Somewhat Suspicious";
       description =
-        "Some patterns commonly associated with unreliable reporting were detected. Review the breakdown below and verify key claims independently.";
+        "Some patterns commonly associated with unreliable reporting were detected. Review the breakdown below and verify key claims with trusted outlets.";
     } else if (credibility >= 40) {
       verdict = "Suspicious";
       description =
@@ -211,7 +226,7 @@
     return { credibility, verdict, description, breakdownItems, tips };
   }
 
-  function generateTips(checks, credibility) {
+  function generateTips(checks) {
     const tips = [];
 
     if (checks.clickbait.raw > 0)
@@ -228,7 +243,7 @@
       );
     if (checks.urgency.raw > 0)
       tips.push(
-        "Urgency and pressure tactics (\"share before they delete this!\") are manipulation techniques. Legitimate news doesn't pressure you to share."
+        "Urgency and pressure tactics are manipulation techniques. Legitimate news doesn't pressure you to share."
       );
     if (checks.absolutist.raw > 0)
       tips.push(
@@ -255,6 +270,9 @@
     tips.push(
       "Cross-reference claims with fact-checking sites like Snopes, PolitiFact, or FactCheck.org."
     );
+    tips.push(
+      "Check the reliable live sources panel for verified coverage of the Middle East conflict."
+    );
 
     return tips;
   }
@@ -278,9 +296,8 @@
   function renderResults({ credibility, verdict, description, breakdownItems, tips }) {
     resultsSection.classList.remove("hidden");
 
-    // Score ring
     const ringFill = document.getElementById("score-ring-fill");
-    const circumference = 2 * Math.PI * 60; // r=60
+    const circumference = 2 * Math.PI * 60;
     const offset = circumference - (credibility / 100) * circumference;
     ringFill.style.strokeDasharray = `${circumference}`;
     ringFill.style.strokeDashoffset = `${circumference}`;
@@ -291,17 +308,14 @@
       ringFill.style.strokeDashoffset = `${offset}`;
     });
 
-    // Score number with count-up
     const scoreNum = document.getElementById("score-number");
     animateNumber(scoreNum, credibility, 800);
     scoreNum.style.color = color;
 
-    // Verdict
     document.getElementById("verdict-text").textContent = verdict;
     document.getElementById("verdict-text").style.color = color;
     document.getElementById("verdict-description").textContent = description;
 
-    // Breakdown bars
     const container = document.getElementById("breakdown-items");
     container.innerHTML = "";
     breakdownItems.forEach((item) => {
@@ -315,13 +329,11 @@
         <span class="bi-value" style="color:${severityColor(item.severity)}">${item.severity}%</span>
       `;
       container.appendChild(row);
-
       requestAnimationFrame(() => {
         row.querySelector(".bi-bar").style.width = `${item.severity}%`;
       });
     });
 
-    // Tips
     const tipsList = document.getElementById("tips-list");
     tipsList.innerHTML = "";
     tips.forEach((t) => {
@@ -335,11 +347,10 @@
 
   function animateNumber(el, target, duration) {
     const start = performance.now();
-    const from = 0;
     function tick(now) {
       const progress = Math.min((now - start) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      el.textContent = Math.round(from + (target - from) * eased);
+      el.textContent = Math.round(target * eased);
       if (progress < 1) requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);

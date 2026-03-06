@@ -3,97 +3,245 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fake News Detector</title>
+  <title>Fake News Detector — Middle East Conflict</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>" />
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div class="logo">
-        <span class="logo-icon">🔍</span>
-        <h1>Fake News Detector</h1>
-      </div>
-      <p class="tagline">Paste any news article or headline and get an instant credibility analysis</p>
+
+  <!-- ── Left Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">🛡️</span>
+      <span class="brand-name">VerifyNews</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-section="query">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Analyze
+      </a>
+      <a href="#results-anchor" class="nav-item" data-section="results">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Results
+      </a>
+      <a href="#how-section" class="nav-item" data-section="how">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        How It Works
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <p>Combating misinformation during the Middle East crisis</p>
+    </div>
+  </aside>
+
+  <!-- ── Main Content ── -->
+  <main class="main">
+
+    <header class="main-header">
+      <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <h1>Is this news real?</h1>
     </header>
 
-    <main>
-      <section class="input-section">
-        <label for="news-input">Paste the news article or headline below:</label>
+    <!-- Input Section -->
+    <section class="input-card" id="query">
+      <div class="input-card-inner">
+        <label for="news-input">Paste a news headline, article, or social media post</label>
         <textarea
           id="news-input"
-          placeholder="e.g. &quot;BREAKING: Scientists discover that drinking coffee makes you immortal! Share before they delete this!!!&quot;"
-          rows="8"
+          placeholder="e.g. &quot;BREAKING: Iran launches 500 missiles at US bases — Share before this is deleted!!!&quot;"
+          rows="6"
         ></textarea>
         <div class="input-actions">
           <span id="char-count" class="char-count">0 characters</span>
           <div class="buttons">
             <button id="clear-btn" class="btn btn-secondary" disabled>Clear</button>
-            <button id="analyze-btn" class="btn btn-primary" disabled>Analyze</button>
+            <button id="analyze-btn" class="btn btn-primary" disabled>
+              Analyze
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section id="results" class="results-section hidden">
-        <div class="score-card">
-          <div class="score-ring-wrapper">
-            <svg class="score-ring" viewBox="0 0 140 140">
-              <circle class="score-ring-bg" cx="70" cy="70" r="60" />
-              <circle id="score-ring-fill" class="score-ring-fill" cx="70" cy="70" r="60" />
-            </svg>
-            <div class="score-value">
-              <span id="score-number">0</span>
-              <span class="score-label">/ 100</span>
-            </div>
-          </div>
-          <div class="score-info">
-            <h2 id="verdict-text">Analyzing...</h2>
-            <p id="verdict-description"></p>
+    <!-- Results Section -->
+    <a id="results-anchor" class="anchor"></a>
+    <section id="results" class="results-section hidden">
+      <div class="score-card">
+        <div class="score-ring-wrapper">
+          <svg class="score-ring" viewBox="0 0 140 140">
+            <circle class="score-ring-bg" cx="70" cy="70" r="60" />
+            <circle id="score-ring-fill" class="score-ring-fill" cx="70" cy="70" r="60" />
+          </svg>
+          <div class="score-value">
+            <span id="score-number">0</span>
+            <span class="score-label">/ 100</span>
           </div>
         </div>
+        <div class="score-info">
+          <h2 id="verdict-text">Analyzing...</h2>
+          <p id="verdict-description"></p>
+        </div>
+      </div>
 
-        <div class="breakdown">
-          <h3>Detailed Breakdown</h3>
-          <div id="breakdown-items" class="breakdown-items"></div>
-        </div>
+      <div class="breakdown card">
+        <h3>Detailed Breakdown</h3>
+        <div id="breakdown-items" class="breakdown-items"></div>
+      </div>
 
-        <div class="tips" id="tips-section">
-          <h3>Recommendations</h3>
-          <ul id="tips-list"></ul>
-        </div>
-      </section>
+      <div class="tips card" id="tips-section">
+        <h3>Recommendations</h3>
+        <ul id="tips-list"></ul>
+      </div>
+    </section>
 
-      <section class="how-it-works">
-        <h3>How It Works</h3>
-        <div class="features">
-          <div class="feature">
-            <div class="feature-icon">📝</div>
-            <h4>Text Analysis</h4>
-            <p>Detects sensationalist language, excessive punctuation, and clickbait patterns</p>
-          </div>
-          <div class="feature">
-            <div class="feature-icon">🎭</div>
-            <h4>Emotion Detection</h4>
-            <p>Identifies emotionally manipulative language designed to bypass critical thinking</p>
-          </div>
-          <div class="feature">
-            <div class="feature-icon">📊</div>
-            <h4>Source Quality</h4>
-            <p>Checks for vague attributions and unverifiable claims common in misinformation</p>
-          </div>
-          <div class="feature">
-            <div class="feature-icon">⚖️</div>
-            <h4>Credibility Score</h4>
-            <p>Combines multiple signals into a clear 0–100 credibility score with explanations</p>
-          </div>
+    <!-- How It Works -->
+    <a id="how-section" class="anchor"></a>
+    <section class="how-it-works">
+      <h3>How It Works</h3>
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon">📝</div>
+          <h4>Text Analysis</h4>
+          <p>Detects sensationalist language, excessive punctuation, and clickbait patterns</p>
         </div>
-      </section>
-    </main>
+        <div class="feature">
+          <div class="feature-icon">🎭</div>
+          <h4>Emotion Detection</h4>
+          <p>Identifies emotionally manipulative language designed to bypass critical thinking</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">📊</div>
+          <h4>Source Quality</h4>
+          <p>Checks for vague attributions and unverifiable claims common in misinformation</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">⚖️</div>
+          <h4>Credibility Score</h4>
+          <p>Combines multiple signals into a clear 0–100 credibility score with explanations</p>
+        </div>
+      </div>
+    </section>
 
     <footer>
-      <p>This tool uses text-analysis heuristics to flag common patterns found in misinformation. It is not a substitute for professional fact-checking. Always verify news with trusted sources.</p>
+      <p>This tool uses text-analysis heuristics to flag common patterns found in misinformation. It is not a substitute for professional fact-checking. Always verify with trusted sources.</p>
     </footer>
-  </div>
+  </main>
+
+  <!-- ── Right Sidebar — Reliable Sources ── -->
+  <aside class="right-panel">
+    <div class="panel-header">
+      <h3>Reliable Live Sources</h3>
+      <span class="live-dot"></span>
+    </div>
+
+    <div class="source-cards">
+
+      <a href="https://www.washingtonpost.com/national-security/2026/03/06/iran-war-us-israel-strikes/" target="_blank" rel="noopener" class="source-card">
+        <div class="source-thumb" style="background:#1a1a2e">
+          <span class="source-logo">WP</span>
+        </div>
+        <div class="source-body">
+          <span class="source-name">Washington Post</span>
+          <p>Live updates on U.S.–Israel strikes and Iran's response</p>
+        </div>
+      </a>
+
+      <a href="https://www.theguardian.com/world/live/2026/mar/05/iran-war-latest-updates-canada-carney-trump-israel-tehran-strikes" target="_blank" rel="noopener" class="source-card">
+        <div class="source-thumb" style="background:#09508a">
+          <span class="source-logo">TG</span>
+        </div>
+        <div class="source-body">
+          <span class="source-name">The Guardian</span>
+          <p>Real-time live blog with strikes, diplomacy &amp; military updates</p>
+        </div>
+      </a>
+
+      <a href="https://apnews.com/article/fbe9e2321aa2f54fa5bf59b0306b1928" target="_blank" rel="noopener" class="source-card">
+        <div class="source-thumb" style="background:#e3120b">
+          <span class="source-logo">AP</span>
+        </div>
+        <div class="source-body">
+          <span class="source-name">Associated Press</span>
+          <p>Casualties, military actions &amp; global reactions</p>
+        </div>
+      </a>
+
+      <a href="https://www.aljazeera.com/video/live" target="_blank" rel="noopener" class="source-card">
+        <div class="source-thumb" style="background:#d2982a">
+          <span class="source-logo">AJ</span>
+        </div>
+        <div class="source-body">
+          <span class="source-name">Al Jazeera</span>
+          <p>Continuous live video coverage &amp; reporting from the region</p>
+        </div>
+      </a>
+
+      <a href="https://www.cnn.com/middleeast/live-news" target="_blank" rel="noopener" class="source-card">
+        <div class="source-thumb" style="background:#cc0000">
+          <span class="source-logo">CNN</span>
+        </div>
+        <div class="source-body">
+          <span class="source-name">CNN</span>
+          <p>Middle East live news with real-time field updates</p>
+        </div>
+      </a>
+
+      <a href="https://www.reuters.com/world/middle-east/" target="_blank" rel="noopener" class="source-card">
+        <div class="source-thumb" style="background:#ff6600">
+          <span class="source-logo">R</span>
+        </div>
+        <div class="source-body">
+          <span class="source-name">Reuters</span>
+          <p>Breaking developments and in-depth analysis</p>
+        </div>
+      </a>
+
+      <a href="https://www.nytimes.com/live" target="_blank" rel="noopener" class="source-card">
+        <div class="source-thumb" style="background:#1a1a1a">
+          <span class="source-logo">NYT</span>
+        </div>
+        <div class="source-body">
+          <span class="source-name">New York Times</span>
+          <p>Live coverage hub — select Israel-Iran conflict</p>
+        </div>
+      </a>
+
+    </div>
+
+    <div class="panel-section">
+      <h4>Live Conflict Maps</h4>
+      <div class="source-cards">
+        <a href="https://liveuamap.com/en/iran" target="_blank" rel="noopener" class="source-card map-card">
+          <div class="source-thumb" style="background:#2d5f2d">
+            <span class="source-logo">🗺️</span>
+          </div>
+          <div class="source-body">
+            <span class="source-name">LiveUAMap — Iran</span>
+            <p>OSINT &amp; satellite verified reports in real time</p>
+          </div>
+        </a>
+        <a href="https://israelpalestine.liveuamap.com" target="_blank" rel="noopener" class="source-card map-card">
+          <div class="source-thumb" style="background:#2d5f2d">
+            <span class="source-logo">🗺️</span>
+          </div>
+          <div class="source-body">
+            <span class="source-name">LiveUAMap — Israel / Palestine</span>
+            <p>Aggregated satellite &amp; OSINT battlefield updates</p>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="panel-tip">
+      <strong>Tip:</strong> Monitor at least one live blog + one live map simultaneously for the fastest situational awareness during the conflict.
+    </div>
+  </aside>
+
+  <!-- Mobile overlay -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
   <script src="script.js"></script>
 </body>
