@@ -10,13 +10,6 @@
   const menuBtn = document.getElementById("mobile-menu-btn");
   const sidebar = document.querySelector(".sidebar");
   const overlay = document.getElementById("sidebar-overlay");
-  const modeBanner = document.getElementById("mode-banner");
-  const modeIcon = document.getElementById("mode-icon");
-  const modeText = document.getElementById("mode-text");
-
-  const GEMINI_MODEL = "gemini-2.0-flash";
-  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-  const STORAGE_KEY = "verifynews_gemini_key";
 
   // ── Mobile menu ────────────────────────────────────────────
 
@@ -38,82 +31,6 @@
       sidebar.classList.remove("open");
       overlay.classList.remove("open");
     });
-  });
-
-  // ── API key management ─────────────────────────────────────
-
-  const apiKeyInput = document.getElementById("api-key-input");
-  const saveKeyBtn = document.getElementById("save-key-btn");
-  const toggleKeyVis = document.getElementById("toggle-key-vis");
-  const keyStatus = document.getElementById("key-status");
-
-  function getApiKey() {
-    return localStorage.getItem(STORAGE_KEY) || "";
-  }
-
-  function hasApiKey() {
-    return getApiKey().length > 10;
-  }
-
-  function updateModeBanner() {
-    if (hasApiKey()) {
-      modeBanner.className = "mode-banner mode-ai";
-      modeIcon.textContent = "🤖";
-      modeText.innerHTML = "AI mode — powered by Google Gemini";
-    } else {
-      modeBanner.className = "mode-banner mode-heuristic";
-      modeIcon.textContent = "⚙️";
-      modeText.innerHTML = 'Basic mode — <a href="#settings-section">add a free Gemini API key</a> for AI-powered analysis';
-    }
-  }
-
-  // Load saved key
-  const savedKey = getApiKey();
-  if (savedKey) {
-    apiKeyInput.value = savedKey;
-  }
-  updateModeBanner();
-
-  saveKeyBtn.addEventListener("click", async () => {
-    const key = apiKeyInput.value.trim();
-    if (!key) {
-      localStorage.removeItem(STORAGE_KEY);
-      keyStatus.className = "key-status";
-      keyStatus.textContent = "Key removed.";
-      updateModeBanner();
-      return;
-    }
-
-    keyStatus.className = "key-status";
-    keyStatus.textContent = "Verifying...";
-
-    try {
-      const res = await fetch(`${GEMINI_URL}?key=${key}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: "Say OK" }] }],
-        }),
-      });
-
-      if (res.ok) {
-        localStorage.setItem(STORAGE_KEY, key);
-        keyStatus.className = "key-status success";
-        keyStatus.textContent = "Key verified and saved! AI analysis is now active.";
-        updateModeBanner();
-      } else {
-        const err = await res.json();
-        keyStatus.className = "key-status error";
-        keyStatus.textContent = `Invalid key: ${err.error?.message || "unknown error"}`;
-      }
-    } catch (e) {
-      keyStatus.className = "key-status error";
-      keyStatus.textContent = `Connection error: ${e.message}`;
-    }
-  });
-
-  toggleKeyVis.addEventListener("click", () => {
-    apiKeyInput.type = apiKeyInput.type === "password" ? "text" : "password";
   });
 
   // ── UI wiring ──────────────────────────────────────────────
@@ -144,41 +61,8 @@
     const steps = loadingSection.querySelectorAll(".loading-step");
     steps.forEach((s) => s.classList.remove("active", "done"));
 
-    const loadingTitle = document.getElementById("loading-title");
-    const loadingSub = document.getElementById("loading-subtitle");
-
-    let result;
-
-    if (hasApiKey()) {
-      loadingTitle.textContent = "AI Analysis in progress...";
-      loadingSub.textContent = "Sending to Google Gemini for deep analysis";
-      steps[0].textContent = "Sending to AI model...";
-      steps[1].textContent = "Evaluating factual plausibility...";
-      steps[2].textContent = "Analyzing language & manipulation patterns...";
-      steps[3].textContent = "Checking source attribution...";
-      steps[4].textContent = "Computing credibility score...";
-
-      animateSteps(steps, 0, 2);
-      try {
-        result = await analyzeWithGemini(text);
-        completeSteps(steps);
-      } catch (e) {
-        completeSteps(steps);
-        result = analyzeHeuristic(text);
-        result.aiError = e.message;
-      }
-    } else {
-      loadingTitle.textContent = "Analyzing text...";
-      loadingSub.textContent = "Running heuristic pattern analysis";
-      steps[0].textContent = "Scanning for clickbait language...";
-      steps[1].textContent = "Detecting emotional manipulation...";
-      steps[2].textContent = "Checking source attribution...";
-      steps[3].textContent = "Verifying statistics & claims...";
-      steps[4].textContent = "Computing credibility score...";
-
-      result = analyzeHeuristic(text);
-      await animateStepsSequential(steps, 600);
-    }
+    const result = analyze(text);
+    await animateStepsSequential(steps, 650);
 
     loadingSection.classList.add("hidden");
     renderResults(result);
@@ -190,19 +74,6 @@
     const resultsNav = document.querySelector('[data-section="results"]');
     if (resultsNav) resultsNav.classList.add("active");
   });
-
-  function animateSteps(steps, startIdx, count) {
-    for (let i = startIdx; i < Math.min(startIdx + count, steps.length); i++) {
-      steps[i].classList.add("active");
-    }
-  }
-
-  function completeSteps(steps) {
-    steps.forEach((s) => {
-      s.classList.remove("active");
-      s.classList.add("done");
-    });
-  }
 
   function animateStepsSequential(steps, interval) {
     return new Promise((resolve) => {
@@ -225,83 +96,7 @@
   }
 
   // ══════════════════════════════════════════════════════════
-  //  GEMINI AI ANALYSIS
-  // ══════════════════════════════════════════════════════════
-
-  const GEMINI_PROMPT = `You are an expert fact-checker and misinformation analyst. Analyze the following news text and determine how likely it is to be fake news or misinformation.
-
-Consider these factors carefully:
-1. **Factual plausibility**: Are the claims realistic and consistent with known facts? Are specific details (names, locations, numbers) plausible?
-2. **Source attribution**: Does the text cite specific, named, verifiable sources? Or does it make bold claims without attribution?
-3. **Language manipulation**: Does the text use clickbait, emotional manipulation, urgency tactics, or sensationalist language?
-4. **Social media patterns**: Does it look like a social media post rather than professional journalism? (#hashtags, ALL CAPS, "share this!", etc.)
-5. **Verifiable specifics**: Does it contain specific statistics, casualty numbers, or dollar amounts that could be fabricated?
-6. **Context**: Is the text suspiciously short with no context? Does it present a complex situation as overly simple?
-7. **Bias and framing**: Does it present only one extreme perspective without nuance?
-
-Respond ONLY with valid JSON (no markdown, no backticks, no extra text). Use this exact structure:
-{
-  "credibility": <number 0-100, where 100 is fully credible and 0 is certainly fake>,
-  "verdict": "<one of: Likely Credible, Somewhat Suspicious, Suspicious, Highly Suspicious>",
-  "description": "<2-3 sentence explanation of the overall assessment>",
-  "breakdown": [
-    {"label": "Factual Plausibility", "severity": <0-100, higher means more problematic>},
-    {"label": "Source Attribution", "severity": <0-100>},
-    {"label": "Language Manipulation", "severity": <0-100>},
-    {"label": "Social Media Patterns", "severity": <0-100>},
-    {"label": "Unverified Specifics", "severity": <0-100>},
-    {"label": "Context & Completeness", "severity": <0-100>},
-    {"label": "Bias & Framing", "severity": <0-100>}
-  ],
-  "tips": ["<specific recommendation 1>", "<specific recommendation 2>", "<specific recommendation 3>"]
-}
-
-NEWS TEXT TO ANALYZE:
-"""
-`;
-
-  async function analyzeWithGemini(text) {
-    const key = getApiKey();
-    const res = await fetch(`${GEMINI_URL}?key=${key}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: GEMINI_PROMPT + text + '\n"""' }] }],
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 1024,
-        },
-      }),
-    });
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error?.message || `API error (${res.status})`);
-    }
-
-    const data = await res.json();
-    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("AI returned unexpected format");
-
-    const parsed = JSON.parse(jsonMatch[0]);
-
-    return {
-      credibility: Math.max(0, Math.min(100, parsed.credibility)),
-      verdict: parsed.verdict,
-      description: parsed.description,
-      breakdownItems: (parsed.breakdown || []).map((b) => ({
-        label: b.label,
-        severity: Math.max(0, Math.min(100, b.severity)),
-      })),
-      tips: parsed.tips || [],
-      isAI: true,
-    };
-  }
-
-  // ══════════════════════════════════════════════════════════
-  //  HEURISTIC ANALYSIS (fallback)
+  //  ANALYSIS ENGINE
   // ══════════════════════════════════════════════════════════
 
   const CLICKBAIT_WORDS = [
@@ -379,8 +174,7 @@ NEWS TEXT TO ANALYZE:
     return patterns.filter((p) => lower.includes(p)).length;
   }
 
-  function analyzeHeuristic(text) {
-    const normalized = normalize(text);
+  function analyze(text) {
     const words = text.split(/\s+/).filter(Boolean);
     const wordCount = words.length;
     const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
@@ -393,7 +187,6 @@ NEWS TEXT TO ANALYZE:
     checks.vague = { label: "Vague Sourcing", raw: countMatches(text, VAGUE_SOURCING), max: 3, weight: 12 };
     checks.urgency = { label: "Urgency / Pressure", raw: countMatches(text, URGENCY_PHRASES), max: 3, weight: 14 };
 
-    // Caps
     const capsWords = words.filter((w) => {
       const clean = w.replace(/[^A-Za-z]/g, "");
       return clean.length >= 2 && clean === clean.toUpperCase() && /[A-Z]/.test(clean);
@@ -401,13 +194,11 @@ NEWS TEXT TO ANALYZE:
     const capsRatio = wordCount > 0 ? capsWords.length / wordCount : 0;
     checks.caps = { label: "Excessive Caps", raw: Math.min(capsRatio / 0.15, 1), max: 1, weight: 10, isRatio: true };
 
-    // Punctuation
     const excl = (text.match(/!/g) || []).length;
     const ques = (text.match(/\?/g) || []).length;
     const punctRatio = sentences.length > 0 ? (excl + ques * 0.5) / sentences.length : 0;
     checks.punctuation = { label: "Punctuation Abuse", raw: Math.min(punctRatio / 1.5, 1), max: 1, weight: 8 };
 
-    // Missing attribution — now triggers on military/conflict claims too
     const hasNumbers = /\d{2,}/.test(text) || /\$[\d,.]+/.test(text) || /\d+\s*(%|percent|billion|million)/i.test(text);
     const hasMilitaryClaim = MILITARY_CLAIM_PATTERNS.some((p) => p.test(text));
     const hasSpecificClaims = hasNumbers || hasMilitaryClaim;
@@ -415,7 +206,6 @@ NEWS TEXT TO ANALYZE:
     const missingAttr = hasSpecificClaims && !hasAttribution ? 1 : 0;
     checks.attribution = { label: "Missing Attribution", raw: missingAttr, max: 1, weight: 18, isRatio: true };
 
-    // Unverified statistics
     const bigNums = text.match(/\$\s*[\d,.]+\s*(billion|trillion|million)/gi) || [];
     const pcts = text.match(/\d+(\.\d+)?\s*%/g) || [];
     const deathTolls = text.match(/\d{3,}\s*(killed|dead|casualties|injured|wounded)/gi) || [];
@@ -423,14 +213,12 @@ NEWS TEXT TO ANALYZE:
     const specScore = wordCount < 40 ? Math.min(specHits / 2, 1) : Math.min(specHits / 4, 1);
     checks.specificity = { label: "Unverified Statistics", raw: specScore, max: 1, weight: 12, isRatio: true };
 
-    // Social media patterns
     const hashtags = (text.match(/#\w+/g) || []).length;
     const mentions = (text.match(/@\w+/g) || []).length;
     const rt = /^RT\s|[\s]RT\s/i.test(text) ? 1 : 0;
     const socialScore = Math.min((hashtags + mentions + rt) / 3, 1);
     checks.social = { label: "Social Media Signals", raw: socialScore, max: 1, weight: 8, isRatio: true };
 
-    // Suspiciously short
     let lengthScore;
     if (wordCount < 15) lengthScore = 1;
     else if (wordCount < 30) lengthScore = 0.7;
@@ -438,7 +226,6 @@ NEWS TEXT TO ANALYZE:
     else lengthScore = 0;
     checks.length = { label: "Suspiciously Short", raw: lengthScore, max: 1, weight: 12, isRatio: true };
 
-    // Compute
     let totalPenalty = 0;
     const breakdownItems = [];
 
@@ -476,6 +263,9 @@ NEWS TEXT TO ANALYZE:
     if (checks.emotion.raw > 0) tips.push("Emotionally charged language can bypass critical thinking. Look for facts behind the framing.");
     if (checks.vague.raw > 0) tips.push('Vague sourcing like "sources say" is a red flag. Credible news names specific sources.');
     if (checks.urgency.raw > 0) tips.push("Urgency and pressure tactics are manipulation techniques. Legitimate news doesn't pressure you.");
+    if (checks.absolutist.raw > 0) tips.push('Absolutist words like "always" or "never" oversimplify complex issues.');
+    if (checks.caps.raw > 0.2) tips.push("Excessive use of ALL CAPS is a common tactic to convey false urgency.");
+    if (checks.punctuation.raw > 0.2) tips.push("Overuse of exclamation marks is a stylistic red flag found in fabricated content.");
     if (checks.attribution.raw > 0) tips.push("Specific claims made without citing a named, verifiable source. Who reported this?");
     if (checks.specificity.raw > 0) tips.push("Precise statistics can be fabricated to appear credible. Verify numbers independently.");
     if (checks.social.raw > 0) tips.push("Social media formatting suggests this originated on platforms where misinformation spreads fastest.");
@@ -484,7 +274,7 @@ NEWS TEXT TO ANALYZE:
     tips.push("Cross-reference claims with Snopes, PolitiFact, or FactCheck.org.");
     tips.push("Check the reliable live sources panel for verified Middle East conflict coverage.");
 
-    return { credibility, verdict, description, breakdownItems, tips, isAI: false };
+    return { credibility, verdict, description, breakdownItems, tips };
   }
 
   // ══════════════════════════════════════════════════════════
@@ -505,29 +295,9 @@ NEWS TEXT TO ANALYZE:
     return "var(--red)";
   }
 
-  function renderResults(result) {
-    const { credibility, verdict, description, breakdownItems, tips, isAI, aiError } = result;
+  function renderResults({ credibility, verdict, description, breakdownItems, tips }) {
     resultsSection.classList.remove("hidden");
 
-    // AI note
-    let existingNote = resultsSection.querySelector(".ai-note");
-    if (existingNote) existingNote.remove();
-
-    if (isAI) {
-      const note = document.createElement("div");
-      note.className = "ai-note";
-      note.innerHTML = '<span class="ai-note-icon">🤖</span><span>This analysis was performed by Google Gemini AI. AI assessments are informed estimates, not definitive fact-checks.</span>';
-      resultsSection.insertBefore(note, resultsSection.firstChild);
-    } else if (aiError) {
-      const note = document.createElement("div");
-      note.className = "ai-note";
-      note.style.background = "#fef2f2";
-      note.style.color = "#991b1b";
-      note.innerHTML = `<span class="ai-note-icon">⚠️</span><span>AI analysis failed (${aiError}). Showing heuristic results instead.</span>`;
-      resultsSection.insertBefore(note, resultsSection.firstChild);
-    }
-
-    // Score ring
     const ringFill = document.getElementById("score-ring-fill");
     const circumference = 2 * Math.PI * 60;
     const offset = circumference - (credibility / 100) * circumference;
@@ -545,7 +315,6 @@ NEWS TEXT TO ANALYZE:
     document.getElementById("verdict-text").style.color = color;
     document.getElementById("verdict-description").textContent = description;
 
-    // Breakdown
     const container = document.getElementById("breakdown-items");
     container.innerHTML = "";
     breakdownItems.forEach((item) => {
@@ -564,7 +333,6 @@ NEWS TEXT TO ANALYZE:
       });
     });
 
-    // Tips
     const tipsList = document.getElementById("tips-list");
     tipsList.innerHTML = "";
     tips.forEach((t) => {

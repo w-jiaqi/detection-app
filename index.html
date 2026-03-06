@@ -28,10 +28,6 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         How It Works
       </a>
-      <a href="#settings-section" class="nav-item" data-section="settings">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Settings
-      </a>
     </nav>
     <div class="sidebar-footer">
       <p>Combating misinformation during the Middle East crisis</p>
@@ -47,12 +43,6 @@
       </button>
       <h1>Is this news real?</h1>
     </header>
-
-    <!-- Analysis mode indicator -->
-    <div id="mode-banner" class="mode-banner mode-heuristic">
-      <span id="mode-icon" class="mode-icon">⚙️</span>
-      <span id="mode-text">Basic mode — <a href="#settings-section">add a free Gemini API key</a> for AI-powered analysis</span>
-    </div>
 
     <!-- Input Section -->
     <section class="input-card" id="query">
@@ -80,13 +70,13 @@
     <section id="loading" class="loading-section hidden">
       <div class="loading-card">
         <div class="loading-spinner-large"></div>
-        <h3 id="loading-title">Analyzing text...</h3>
-        <p id="loading-subtitle">Running AI-powered misinformation analysis</p>
-        <div id="loading-steps" class="loading-steps">
-          <div class="loading-step" data-step="1">Sending to AI model...</div>
-          <div class="loading-step" data-step="2">Evaluating factual plausibility...</div>
+        <h3>Analyzing text...</h3>
+        <p>Running misinformation pattern analysis</p>
+        <div class="loading-steps">
+          <div class="loading-step" data-step="1">Scanning for clickbait language...</div>
+          <div class="loading-step" data-step="2">Detecting emotional manipulation...</div>
           <div class="loading-step" data-step="3">Checking source attribution...</div>
-          <div class="loading-step" data-step="4">Analyzing language patterns...</div>
+          <div class="loading-step" data-step="4">Analyzing military &amp; factual claims...</div>
           <div class="loading-step" data-step="5">Computing credibility score...</div>
         </div>
       </div>
@@ -129,9 +119,9 @@
       <h3>How It Works</h3>
       <div class="features">
         <div class="feature">
-          <div class="feature-icon">🤖</div>
-          <h4>AI Analysis</h4>
-          <p>Uses Google Gemini AI to evaluate factual plausibility, context, and credibility of claims</p>
+          <div class="feature-icon">📝</div>
+          <h4>Text Analysis</h4>
+          <p>Detects sensationalist language, clickbait patterns, and military claims without attribution</p>
         </div>
         <div class="feature">
           <div class="feature-icon">🎭</div>
@@ -151,27 +141,8 @@
       </div>
     </section>
 
-    <!-- Settings -->
-    <a id="settings-section" class="anchor"></a>
-    <section class="settings-section card">
-      <h3>Settings</h3>
-      <div class="setting-group">
-        <label for="api-key-input">Google Gemini API Key</label>
-        <p class="setting-desc">Add a free API key to enable AI-powered analysis. Without it, only basic heuristic analysis is available. Your key is stored only in your browser and never sent anywhere except Google's API.</p>
-        <div class="api-key-row">
-          <input type="password" id="api-key-input" placeholder="Paste your Gemini API key here" autocomplete="off" />
-          <button id="toggle-key-vis" class="btn btn-secondary btn-icon" title="Show/hide key">
-            <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-          <button id="save-key-btn" class="btn btn-primary">Save</button>
-        </div>
-        <div id="key-status" class="key-status"></div>
-        <p class="setting-help">Get a free API key at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a> — no credit card needed. Free tier: 1,500 requests/day.</p>
-      </div>
-    </section>
-
     <footer>
-      <p>This tool uses AI and text-analysis heuristics to flag misinformation patterns. It is not a substitute for professional fact-checking. Always verify with trusted sources.</p>
+      <p>This tool uses text-analysis heuristics to flag common misinformation patterns. It is not a substitute for professional fact-checking. Always verify with trusted sources.</p>
     </footer>
   </main>
 
