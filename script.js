@@ -55,13 +55,14 @@
     const result = analyze(text);
     renderResults(result);
 
-    // Activate "Results" nav
     document.querySelectorAll(".nav-item").forEach((n) => n.classList.remove("active"));
     const resultsNav = document.querySelector('[data-section="results"]');
     if (resultsNav) resultsNav.classList.add("active");
   });
 
-  // ── Analysis engine ────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════
+  //  ANALYSIS ENGINE (v2 — improved detection)
+  // ══════════════════════════════════════════════════════════
 
   const CLICKBAIT_WORDS = [
     "shocking", "unbelievable", "you won't believe", "mind-blowing",
@@ -69,7 +70,9 @@
     "exposed", "bombshell", "conspiracy", "cover-up", "coverup",
     "gone wrong", "gone viral", "what happened next", "this is why",
     "the truth about", "what they're hiding", "doctors hate",
-    "one weird trick", "miracle", "banned", "censored",
+    "one weird trick", "miracle", "banned", "censored", "must see",
+    "must watch", "look what", "exposed", "you need to see this",
+    "won't believe what", "the real reason",
   ];
 
   const EMOTIONAL_WORDS = [
@@ -79,6 +82,10 @@
     "destroy", "destroyed", "annihilate", "obliterate", "slammed",
     "blasted", "ripped", "savaged", "eviscerated", "torched",
     "brutal", "vicious", "evil", "sinister", "demonic",
+    "bloodbath", "carnage", "massacre", "genocide", "exterminate",
+    "collapse", "collapsed", "meltdown", "plunge", "plunged",
+    "plummets", "plummeted", "skyrocket", "soar", "surge",
+    "crash", "crashed", "wipe out", "wiped out", "tank", "tanked",
   ];
 
   const ABSOLUTIST_WORDS = [
@@ -86,6 +93,7 @@
     "all of them", "none of them", "impossible", "guaranteed",
     "proven", "undeniable", "without a doubt", "100%", "totally",
     "completely", "absolutely", "definitely", "certainly",
+    "entire", "entire country", "whole world", "the whole",
   ];
 
   const VAGUE_SOURCING = [
@@ -93,7 +101,8 @@
     "some say", "it is believed", "reportedly", "allegedly",
     "according to sources", "insiders say", "experts claim",
     "studies show", "research shows", "scientists say",
-    "a source close to", "anonymous sources",
+    "a source close to", "anonymous sources", "rumor has it",
+    "word is", "i'm hearing", "i've been told",
   ];
 
   const URGENCY_PHRASES = [
@@ -101,68 +110,99 @@
     "share before", "share this before", "they're deleting this",
     "act now", "spread the word", "wake up", "open your eyes",
     "do your own research", "mainstream media won't tell you",
-    "msm", "what msm won't report",
+    "msm", "what msm won't report", "happening now",
+    "right now", "live update", "flash",
   ];
 
+  const CREDIBLE_ATTRIBUTIONS = [
+    "according to", "said in a statement", "told reporters",
+    "press release", "official statement", "spokesperson said",
+    "press conference", "the report said", "confirmed by",
+    "reuters reported", "ap reported", "according to the",
+    "the pentagon said", "the white house said", "ministry said",
+    "government said", "officials said", "official said",
+    "in a statement", "cited by", "reported by",
+    "new york times", "washington post", "bbc", "cnn reported",
+    "guardian reported", "al jazeera reported",
+  ];
+
+  function normalize(text) {
+    return text
+      .replace(/#/g, " ")
+      .replace(/@/g, " ")
+      .replace(/['']/g, "'")
+      .toLowerCase();
+  }
+
   function countMatches(text, patterns) {
-    const lower = text.toLowerCase();
+    const lower = normalize(text);
     return patterns.filter((p) => lower.includes(p)).length;
   }
 
   function analyze(text) {
+    const normalized = normalize(text);
     const words = text.split(/\s+/).filter(Boolean);
+    const cleanWords = normalized.split(/\s+/).filter(Boolean);
     const wordCount = words.length;
     const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
 
     const checks = {};
 
+    // 1. Clickbait / sensationalism
     checks.clickbait = {
       label: "Clickbait Language",
       raw: countMatches(text, CLICKBAIT_WORDS),
-      max: 6,
-      weight: 20,
-    };
-
-    checks.emotion = {
-      label: "Emotional Manipulation",
-      raw: countMatches(text, EMOTIONAL_WORDS),
-      max: 6,
+      max: 5,
       weight: 18,
     };
 
+    // 2. Emotional manipulation (expanded with financial fear words)
+    checks.emotion = {
+      label: "Emotional Manipulation",
+      raw: countMatches(text, EMOTIONAL_WORDS),
+      max: 5,
+      weight: 16,
+    };
+
+    // 3. Absolutist language
     checks.absolutist = {
       label: "Absolutist Language",
       raw: countMatches(text, ABSOLUTIST_WORDS),
-      max: 5,
-      weight: 12,
+      max: 4,
+      weight: 10,
     };
 
+    // 4. Vague sourcing
     checks.vague = {
       label: "Vague Sourcing",
       raw: countMatches(text, VAGUE_SOURCING),
-      max: 4,
-      weight: 15,
-    };
-
-    checks.urgency = {
-      label: "Urgency / Pressure",
-      raw: countMatches(text, URGENCY_PHRASES),
-      max: 4,
+      max: 3,
       weight: 12,
     };
 
-    const capsWords = words.filter(
-      (w) => w.length >= 2 && w === w.toUpperCase() && /[A-Z]/.test(w)
-    );
+    // 5. Urgency / pressure
+    checks.urgency = {
+      label: "Urgency / Pressure",
+      raw: countMatches(text, URGENCY_PHRASES),
+      max: 3,
+      weight: 14,
+    };
+
+    // 6. ALL-CAPS abuse (strip # and @ before checking)
+    const capsWords = words.filter((w) => {
+      const clean = w.replace(/[^A-Za-z]/g, "");
+      return clean.length >= 2 && clean === clean.toUpperCase() && /[A-Z]/.test(clean);
+    });
     const capsRatio = wordCount > 0 ? capsWords.length / wordCount : 0;
     checks.caps = {
       label: "Excessive Caps",
-      raw: Math.min(capsRatio / 0.25, 1),
+      raw: Math.min(capsRatio / 0.15, 1),
       max: 1,
-      weight: 8,
+      weight: 10,
       isRatio: true,
     };
 
+    // 7. Punctuation abuse
     const exclamations = (text.match(/!/g) || []).length;
     const questions = (text.match(/\?/g) || []).length;
     const punctRatio =
@@ -171,34 +211,90 @@
         : 0;
     checks.punctuation = {
       label: "Punctuation Abuse",
-      raw: Math.min(punctRatio / 2, 1),
+      raw: Math.min(punctRatio / 1.5, 1),
       max: 1,
       weight: 8,
     };
 
-    const lengthScore = wordCount < 20 ? 1 : wordCount < 60 ? 0.5 : 0;
+    // 8. Missing attribution — specific claims with no named source
+    const hasSpecificClaims = /\d{2,}/.test(text) ||
+      /\$[\d,.]+/.test(text) ||
+      /\d+\s*(%|percent|billion|million|trillion|thousand|killed|dead|casualties)/i.test(text);
+    const hasAttribution = countMatches(text, CREDIBLE_ATTRIBUTIONS) > 0;
+    const missingAttr = hasSpecificClaims && !hasAttribution ? 1 : 0;
+    checks.attribution = {
+      label: "Missing Attribution",
+      raw: missingAttr,
+      max: 1,
+      weight: 15,
+      isRatio: true,
+    };
+
+    // 9. Suspicious specificity — large round numbers or precise $ in short text
+    const bigNumbers = text.match(/\$\s*[\d,.]+\s*(billion|trillion|million)/gi) || [];
+    const precisePercent = text.match(/\d+(\.\d+)?\s*%/g) || [];
+    const largeDeathTolls = text.match(/\d{3,}\s*(killed|dead|die|casualties|injured|wounded)/gi) || [];
+    const specificityHits = bigNumbers.length + precisePercent.length + largeDeathTolls.length;
+    const specificityScore = wordCount < 40
+      ? Math.min(specificityHits / 2, 1)
+      : Math.min(specificityHits / 4, 1);
+    checks.specificity = {
+      label: "Unverified Statistics",
+      raw: specificityScore,
+      max: 1,
+      weight: 12,
+      isRatio: true,
+    };
+
+    // 10. Social media patterns — hashtags, @mentions, "RT", emojis as emphasis
+    const hashtags = (text.match(/#\w+/g) || []).length;
+    const mentions = (text.match(/@\w+/g) || []).length;
+    const rtPattern = /^RT\s|[\s]RT\s/i.test(text) ? 1 : 0;
+    const socialSignals = hashtags + mentions + rtPattern;
+    const socialScore = Math.min(socialSignals / 3, 1);
+    checks.social = {
+      label: "Social Media Signals",
+      raw: socialScore,
+      max: 1,
+      weight: 8,
+      isRatio: true,
+    };
+
+    // 11. Suspiciously short
+    let lengthScore;
+    if (wordCount < 15) lengthScore = 1;
+    else if (wordCount < 30) lengthScore = 0.7;
+    else if (wordCount < 60) lengthScore = 0.35;
+    else lengthScore = 0;
     checks.length = {
       label: "Suspiciously Short",
       raw: lengthScore,
       max: 1,
-      weight: 7,
+      weight: 10,
+      isRatio: true,
     };
 
+    // ── Compute credibility ──
     let totalPenalty = 0;
     const breakdownItems = [];
 
     for (const key of Object.keys(checks)) {
       const c = checks[key];
-      const normalized = c.isRatio ? c.raw : Math.min(c.raw / c.max, 1);
-      const penalty = normalized * c.weight;
+      const norm = c.isRatio ? c.raw : Math.min(c.raw / c.max, 1);
+      const penalty = norm * c.weight;
       totalPenalty += penalty;
 
       breakdownItems.push({
         label: c.label,
-        severity: Math.round(normalized * 100),
+        severity: Math.round(norm * 100),
         penalty: Math.round(penalty),
       });
     }
+
+    // Interaction bonus: multiple weak signals compound
+    const flaggedCategories = breakdownItems.filter((b) => b.severity > 25).length;
+    if (flaggedCategories >= 3) totalPenalty += 5;
+    if (flaggedCategories >= 5) totalPenalty += 8;
 
     const credibility = Math.max(0, Math.round(100 - totalPenalty));
 
@@ -247,19 +343,31 @@
       );
     if (checks.absolutist.raw > 0)
       tips.push(
-        'Absolutist words like "always" or "never" oversimplify complex issues. Real-world events rarely have absolute outcomes.'
+        'Absolutist words like "always" or "never" oversimplify complex issues.'
       );
-    if (checks.caps.raw > 0.3)
+    if (checks.caps.raw > 0.2)
       tips.push(
-        "Excessive use of ALL CAPS is a common tactic to convey false urgency."
+        "Excessive use of ALL CAPS is a common tactic to convey false urgency and importance."
       );
-    if (checks.punctuation.raw > 0.3)
+    if (checks.punctuation.raw > 0.2)
       tips.push(
-        "Overuse of exclamation marks and question marks is a stylistic red flag found in low-quality or fabricated content."
+        "Overuse of exclamation marks is a stylistic red flag found in low-quality or fabricated content."
       );
-    if (checks.length.raw > 0)
+    if (checks.attribution.raw > 0)
       tips.push(
-        "Very short articles or isolated headlines lack context. Look for the full story from a reputable outlet."
+        "This text makes specific claims (numbers, statistics, dollar amounts) without citing a named source. Credible reporting always attributes data to verifiable sources."
+      );
+    if (checks.specificity.raw > 0)
+      tips.push(
+        "Precise-sounding statistics (dollar amounts, percentages, casualty figures) can be fabricated to make fake news appear credible. Verify these numbers independently."
+      );
+    if (checks.social.raw > 0)
+      tips.push(
+        "Social media formatting (hashtags, @mentions) suggests this originated on social platforms where misinformation spreads fastest."
+      );
+    if (checks.length.raw > 0.3)
+      tips.push(
+        "Very short posts or isolated headlines lack context. Look for the full story from a reputable outlet."
       );
 
     if (tips.length === 0)
@@ -277,7 +385,9 @@
     return tips;
   }
 
-  // ── Rendering ──────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════
+  //  RENDERING
+  // ══════════════════════════════════════════════════════════
 
   function getColor(score) {
     if (score >= 80) return "var(--green)";
